@@ -5,8 +5,11 @@
 
 body {
   font-family: 'Montserrat', sans-serif;
-  padding-top: 15px;
   font-size: 12px
+}
+
+.home {
+  padding-top: 65px;
 }
 
 .titles {
@@ -84,3 +87,77 @@ h3, h4 {
   border: 1px solid lightgrey;
   background: white;
 }
+
+#avatar{
+  border-radius: 50%;
+  height: 100px;
+}
+
+li p{
+  margin-left: 10px;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+#button-edit-profile,
+#button-logout{
+  color: #ffffff;
+  margin: 10px;
+  background: #38468c;
+}
+
+.info {
+  padding: 5%;
+}
+
+.info a {
+  margin-left: 10px;
+}
+
+p:nth-of-type(odd){
+  background-color: #d3d3d3;
+}
+
+#btn-log-out {
+  color: #ffffff;
+}
+
+.new-entry {
+  margin: 3%;
+  border: none;
+}
+
+#entry-title {
+  margin-bottom: 0;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.controls {
+  margin: 0 15px 10px;
+}
+
+.remove-padding {
+  padding: 0;
+}
+
+.full {
+  width: 100%;
+}
+
+#entries {
+  margin-top: 5%;
+}
+
+#file-image{
+  display: none;
+}
+
+@media screen and (max-width: 767px) {
+  #controls-row {
+    justify-content: center;
+    margin-left: 5px;
+    margin-bottom: 15px;
+  }
+}
+

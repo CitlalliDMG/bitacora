@@ -20,7 +20,8 @@
 
         <h3 class="titles">Crea una cuenta</h3>
 
-        <form role="form">
+        <!-- Se cambia tag form por div debido a error con Firebase -->
+        <div>
           <div class="form-group">
             <input type="text" class="form-control" id="txt-name" placeholder="Nombre de usuario" required>
           </div>
@@ -30,20 +31,20 @@
           <div class="form-group">
             <input type="password" class="form-control" id="txt-password" placeholder="Contraseña" required>
           </div>
-          <button type="submit" class="btn btn btn-primary">
+          <button type="submit" class="btn btn btn-primary" id="btn-sign-up">
             Regístrate
           </button>
-        </form>
+        </div>
 
       </section>
 
     </div>
   </main>
 
-
   <script src="https://www.gstatic.com/firebasejs/5.4.0/firebase.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
-    crossorigin="anonymous"></script>
+  <script src="../js/firebase.js"></script>
+  <script src="../js/newUser.js"></script>
+
 </body>
 
 </html>
