@@ -153,22 +153,17 @@ const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
   const title = document.createElement('p');
   const date = document.createElement('p');
   const body = document.createElement('p');
-  const editArea = document.createElement('textarea');
-  const editButton = document.createElement('button');
   const deleteButton = document.createElement('button');
   const time = datePost; // Get the time in miliseconds from post data
   const timeToDate = getTimeToDate(time); // Convert the time to string in format UTC
 
   // Asigna clase a la area de texto para editar
   listItem.className = 'entry-card';
-  editArea.className = 'hide';
   title.className = 'entry-name titles';
   body.className = 'editMode';
   date.className = 'dateString';
 
   // Asignación de texto y clase a botones
-  editButton.innerHTML = 'Editar';
-  editButton.className = 'edit';
   deleteButton.innerHTML = 'Borrar';
   deleteButton.className = 'delete';
   title.innerHTML = `${entryBody}`;
@@ -179,62 +174,24 @@ const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
   listItem.appendChild(title);
   listItem.appendChild(date);
   listItem.appendChild(body);
-  listItem.appendChild(editArea);
-  listItem.appendChild(editButton);
   listItem.appendChild(deleteButton);
   return listItem;
 };
 
-const addPost = (key, entryCollection) => {
+const addEntry = (key, entryCollection) => {
   const listItem = createNewEntryElement(entryCollection.title, entryCollection.body, entryCollection.creator, entryCollection.entryDate);
-  listItem.setAttribute('data-keypost', key);
+  listItem.setAttribute('data-keyentry', key);
   entryList.insertBefore(listItem, entryList.childNodes[0]);
-  bindPostEvents(listItem);
+  bindEntryEvents(listItem);
 };
 
-const bindPostEvents = (entryListItem) => {
-  const editButton = entryListItem.querySelector('button.edit');
+const bindEntryEvents = (entryListItem) => {
   const deleteButton = entryListItem.querySelector('button.delete');
-  deleteButton.addEventListener('click', deletePost);
-  editButton.addEventListener('click', editPost);
+  deleteButton.addEventListener('click', deleteEntry);
 };
 
-const editPost = () => {
-  const listItem = event.target.parentNode;
-  let originTxt = listItem.querySelector('textarea');
-  const keyListItem = event.target.parentNode.dataset.keypost;
-  const areaEdit = listItem.querySelector('p[class= editMode]');
-  const editButton = event.target;
-  const containsClass = listItem.classList.contains('editMode');
-
-  const refEntryToEdit = refEntry.child(keyListItem);
-
-  refEntryToEdit.once('value', (snapshot) => {
-    const dataPost = snapshot.val();
-    if (containsClass) {
-      refEntryToEdit.update({
-        text: originTxt.value
-      });
-      editButton.innerHTML = '<span class="glyphicon glyphicon-pencil"></span> Editar';
-      originTxt.classList.add('hide');
-
-      areaEdit.value = '';
-      areaEdit.innerHTML = originTxt.value;
-
-      listItem.classList.remove('editMode');
-    } else {
-      editButton.innerHTML = '<span class="glyphicon glyphicon-floppy-disk"></span> Guardar';
-      originTxt.value = dataPost.text;
-
-      originTxt.classList.remove('hide');
-      listItem.classList.add('editMode');
-    }
-  });
-};
-
-
-const deletePost = () => {
-  const keyListItem = event.target.parentNode.dataset.keypost;
+const deleteEntry = () => {
+  const keyListItem = event.target.parentNode.dataset.keyentry;
   const refEntryToDelete = refEntry.child(keyListItem);
   swal({
     title: '¿Estás segur@?',
@@ -260,9 +217,9 @@ const deletePost = () => {
 const getPostOfFirebase = () => {
   refEntry.on('value', (snapshot) => {
     entryList.innerHTML = '';
-    const dataPost = snapshot.val();
-    for (let key in dataPost) {
-      addPost(key, dataPost[key]);
+    const dataEntry = snapshot.val();
+    for (let key in dataEntry) {
+      addEntry(key, dataEntry[key]);
     }
   });
 };
