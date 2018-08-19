@@ -114,7 +114,7 @@ li p{
   margin-left: 10px;
 }
 
-p:nth-of-type(odd){
+ul p:nth-of-type(odd){
   background-color: #d3d3d3;
 }
 
@@ -150,6 +150,22 @@ p:nth-of-type(odd){
 }
 
 #file-image{
+  display: none;
+}
+
+.entry-card{
+  border: 1px solid #26a69a;
+  border-radius: 5px;
+  margin-bottom: 1em;
+  padding: 1em;
+}
+
+.entry-name{
+  font-weight: bold;
+  font-size: 2em;
+}
+
+.hide{
   display: none;
 }
 

@@ -3,6 +3,7 @@ let database = firebase.database();
 
 firebase.auth().onAuthStateChanged(firebaseUser => {
   let user = firebase.auth().currentUser;
+
   if (user !== null) {
     user.updateProfile({
       displayName: user.displayName
@@ -13,9 +14,10 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
     if (userPhoto) {
       document.getElementById('profile-image').innerHTML = `<img src="${user.photoURL}" id="avatar">`;
     } else {
-      document.getElementById('profile-image').innerHTML = `<img src="${'../images/placeholder-user.png'}" id="avatar">`;
+      document.getElementById('profile-image').innerHTML = `<img src="${'../img/placeholder-user.png'}" id="avatar">`;
     }
     document.getElementById('user-email').innerHTML = `${user.email}`;
+    init();
   } else {
     console.log('not logged in');
   }
@@ -62,7 +64,7 @@ const doClickImage = () => {
   //     containerPublic.appendChild(containerImage);
   //     // console.log(e.target.result);
   // }
-// };
+  // };
 };
 
 inputImage.addEventListener('click', doClickImage);
@@ -113,3 +115,154 @@ btnLogout.addEventListener('click', event => {
   firebase.auth().signOut();
   window.location.assign('../index.html');
 });
+
+const entryList = document.getElementById('new-entries');
+let refEntry;
+const init = () => {
+  let userUid = firebase.auth().currentUser.uid;
+  refEntry = firebase.database().ref().child('user-entries/' + userUid);
+  getPostOfFirebase();
+};
+
+const getTimeToDate = (time) => {
+  let timeToDate = new Date(time);
+  let day = timeToDate.getDate();
+  let month = timeToDate.getMonth() + 1;
+  let year = timeToDate.getFullYear();
+  let hours = timeToDate.getHours();
+  let minutes = timeToDate.getMinutes();
+
+  if (minutes < 10) {
+    minutes = '0' + minutes;
+  };
+  if (day < 10) {
+    day = '0' + day;
+  };
+
+  if (month < 10) {
+    month = '0' + month;
+  };
+
+  timeToDate = `${day} / ${month} / ${year} a las ${hours} : ${minutes}`;
+  return timeToDate;
+};
+
+const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
+  // Crea los elementos que aparecen en el DOM
+  const listItem = document.createElement('div');
+  const title = document.createElement('p');
+  const date = document.createElement('p');
+  const body = document.createElement('p');
+  const editArea = document.createElement('textarea');
+  const editButton = document.createElement('button');
+  const deleteButton = document.createElement('button');
+  const time = datePost; // Get the time in miliseconds from post data
+  const timeToDate = getTimeToDate(time); // Convert the time to string in format UTC
+
+  // Asigna clase a la area de texto para editar
+  listItem.className = 'entry-card';
+  editArea.className = 'hide';
+  title.className = 'entry-name titles';
+  body.className = 'editMode';
+  date.className = 'dateString';
+
+  // Asignación de texto y clase a botones
+  editButton.innerHTML = 'Editar';
+  editButton.className = 'edit';
+  deleteButton.innerHTML = 'Borrar';
+  deleteButton.className = 'delete';
+  title.innerHTML = `${entryBody}`;
+  body.innerHTML = entryTitle;
+  date.innerHTML = `${timeToDate} <hr>`;
+
+  // Añadiendo elementos al DOM
+  listItem.appendChild(title);
+  listItem.appendChild(date);
+  listItem.appendChild(body);
+  listItem.appendChild(editArea);
+  listItem.appendChild(editButton);
+  listItem.appendChild(deleteButton);
+  return listItem;
+};
+
+const addPost = (key, entryCollection) => {
+  const listItem = createNewEntryElement(entryCollection.title, entryCollection.body, entryCollection.creator, entryCollection.entryDate);
+  listItem.setAttribute('data-keypost', key);
+  entryList.insertBefore(listItem, entryList.childNodes[0]);
+  bindPostEvents(listItem);
+};
+
+const bindPostEvents = (entryListItem) => {
+  const editButton = entryListItem.querySelector('button.edit');
+  const deleteButton = entryListItem.querySelector('button.delete');
+  deleteButton.addEventListener('click', deletePost);
+  editButton.addEventListener('click', editPost);
+};
+
+const editPost = () => {
+  const listItem = event.target.parentNode;
+  let originTxt = listItem.querySelector('textarea');
+  const keyListItem = event.target.parentNode.dataset.keypost;
+  const areaEdit = listItem.querySelector('p[class= editMode]');
+  const editButton = event.target;
+  const containsClass = listItem.classList.contains('editMode');
+
+  const refEntryToEdit = refEntry.child(keyListItem);
+
+  refEntryToEdit.once('value', (snapshot) => {
+    const dataPost = snapshot.val();
+    if (containsClass) {
+      refEntryToEdit.update({
+        text: originTxt.value
+      });
+      editButton.innerHTML = '<span class="glyphicon glyphicon-pencil"></span> Editar';
+      originTxt.classList.add('hide');
+
+      areaEdit.value = '';
+      areaEdit.innerHTML = originTxt.value;
+
+      listItem.classList.remove('editMode');
+    } else {
+      editButton.innerHTML = '<span class="glyphicon glyphicon-floppy-disk"></span> Guardar';
+      originTxt.value = dataPost.text;
+
+      originTxt.classList.remove('hide');
+      listItem.classList.add('editMode');
+    }
+  });
+};
+
+
+const deletePost = () => {
+  const keyListItem = event.target.parentNode.dataset.keypost;
+  const refEntryToDelete = refEntry.child(keyListItem);
+  swal({
+    title: '¿Estás segur@?',
+    text: 'Esta acción borrará permanentemente la entrada',
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ff0000',
+    cancelButtonColor: '#231F20',
+    confirmButtonText: 'Sí, borralo',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.value) {
+      refEntryToDelete.remove();
+      swal(
+        '¡Listo!',
+        'La entrada seleccionada a sido eliminada',
+        'success'
+      );
+    }
+  });
+};
+
+const getPostOfFirebase = () => {
+  refEntry.on('value', (snapshot) => {
+    entryList.innerHTML = '';
+    const dataPost = snapshot.val();
+    for (let key in dataPost) {
+      addPost(key, dataPost[key]);
+    }
+  });
+};
