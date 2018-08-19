@@ -169,6 +169,24 @@ ul p:nth-of-type(odd){
   display: none;
 }
 
+#drop-zone {
+  border: 1px dashed #444;
+  height: 100px;
+  margin-bottom: 15px;
+  text-align: center;
+  line-height: 100px;
+}
+
+.thumb {
+  height: 75px;
+  border: 1px solid #000;
+  margin: 10px 5px 0 0;
+}
+
+#file-image {
+  display: none;
+}
+
 @media screen and (max-width: 767px) {
   #controls-row {
     justify-content: center;

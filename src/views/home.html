@@ -58,11 +58,7 @@
       <textarea class="new-entry" id="new-entry" cols="20" rows="3" placeholder="Escribe una nueva entrada"></textarea>
       <div class="row controls">
         <div class="row col-12 col-md-9" id="controls-row">
-          <form>
-            <input type="file" id="file-image" accept="image/*">
-          </form>
-          <a class="btn btn-circle mr-3 d-flex justify-content-center align-items-center" data-toggle="collapse" aria-expanded="false"
-            aria-controls="collapseExample" type="file" id="input-image">
+          <a type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
             <i class="fas fa-image"></i>
           </a>
           <a class="btn btn-circle mr-3 d-flex justify-content-center align-items-center" data-toggle="collapse" aria-expanded="false"
@@ -87,6 +83,29 @@
     </div>
   </main>
 
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Sube una imagen</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="drop-zone">Arrastra tus imagenes aquí</div>
+          <label for="file-image" class="btn btn-primary">O seleccionalas aquí</label>
+          <input type="file" id="file-image" accept="image/*" multiple>
+          <output id="list"></output>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="button-image-cancel">Cancelar</button>
+          <button type="button" class="btn btn-primary">Guardar imagen</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <section class="container" id="entries">
     <div class="cardStartMake" id="new-entries"></div>
   </section>

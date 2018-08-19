@@ -1,6 +1,9 @@
 // Get a reference to the database service
 let database = firebase.database();
 
+// Get a reference to the storage service
+let storage = firebase.storage();
+
 firebase.auth().onAuthStateChanged(firebaseUser => {
   let user = firebase.auth().currentUser;
 
@@ -41,33 +44,71 @@ const entryText = document.getElementById('new-entry');
 const btnPost = document.getElementById('save-entry');
 const inputImage = document.getElementById('input-image');
 
-// Save image
-const doClickImage = () => {
-  console.log('esta entrando');
-  let imageFile = document.getElementById('file-image');
-  console.log(imageFile);
-  if (imageFile) {
-    imageFile.click();
-  }
-  //   const newFileReader = new FileReader();
-  //   newFileReader.addEventListener("load", function(e){
-  //     const containerImage = document.createElement("div");
-  //     const imageElement = document.createElement("img");
-  //     const titleElement = document.createElement("h4");
+// FUNCTIONS FOR ADD AND IMAGE
 
-  //     containerImage.classList.add("card");
-  //     imageElement.src = e.target.result;
-  //     titleElement.innerText = titleImage.value;
-
-  //     containerImage.appendChild(titleElement);
-  //     containerImage.appendChild(imageElement);
-  //     containerPublic.appendChild(containerImage);
-  //     // console.log(e.target.result);
-  // }
-  // };
+const thumbFile = (theFile) => {
+  return (eventFile) => {
+    // Render thumbnail.
+    let span = document.createElement('span');
+    span.innerHTML = ['<img class="thumb" src="', eventFile.target.result,
+      '" title="', escape(theFile.name), '"/>'].join('');
+    document.getElementById('list').insertBefore(span, null);
+  };
 };
 
-inputImage.addEventListener('click', doClickImage);
+const handleFileSelect = (event) => {
+  // Get the FileList object
+  let files = event.target.files;
+
+  // Loop through the FileList and render image files as thumbnails.
+  for (let i = 0, file; file = files[i]; i++) {
+    let reader = new FileReader();
+
+    // Closure to capture the file information.
+    reader.onload = thumbFile(file);
+
+    // Read in the image file as a data URL.
+    reader.readAsDataURL(file);
+  }
+};
+
+document.getElementById('file-image').addEventListener('change', handleFileSelect, false);
+
+function handleFileSelectDrop(evt) {
+  evt.stopPropagation();
+  evt.preventDefault();
+
+  var files = evt.dataTransfer.files; // FileList object.
+
+  // Loop through the FileList and render image files as thumbnails.
+  for (let i = 0, file; file = files[i]; i++) {
+    let reader = new FileReader();
+
+    // Closure to capture the file information.
+    reader.onload = thumbFile(file);
+
+    // Read in the image file as a data URL.
+    reader.readAsDataURL(file);
+  }
+}
+
+function handleDragOver(evt) {
+  evt.stopPropagation();
+  evt.preventDefault();
+  evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+}
+
+// Setup the dnd listeners.
+var dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', handleDragOver, false);
+dropZone.addEventListener('drop', handleFileSelectDrop, false);
+
+// Clean modal image
+document.getElementById('button-image-cancel').addEventListener('click', ()=>{
+  document.getElementById('list').innerHTML = '';
+});
+
+// END OF FUNCTIONS FOR ADD AND IMAGE
 
 const writeNewEntry = () => {
   const currentUser = firebase.auth().currentUser;
@@ -116,6 +157,7 @@ btnLogout.addEventListener('click', event => {
   window.location.assign('../index.html');
 });
 
+// Get the entries list of the current user
 const entryList = document.getElementById('new-entries');
 let refEntry;
 const init = () => {
@@ -124,6 +166,7 @@ const init = () => {
   getPostOfFirebase();
 };
 
+// Get the date of the post and give format
 const getTimeToDate = (time) => {
   let timeToDate = new Date(time);
   let day = timeToDate.getDate();
@@ -147,6 +190,7 @@ const getTimeToDate = (time) => {
   return timeToDate;
 };
 
+// Function to create the structure of a new entry (only text)
 const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
   // Crea los elementos que aparecen en el DOM
   const listItem = document.createElement('div');
@@ -157,20 +201,20 @@ const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
   const time = datePost; // Get the time in miliseconds from post data
   const timeToDate = getTimeToDate(time); // Convert the time to string in format UTC
 
-  // Asigna clase a la area de texto para editar
+  // Assign class to the text area to edit
   listItem.className = 'entry-card';
   title.className = 'entry-name titles';
   body.className = 'editMode';
   date.className = 'dateString';
 
-  // Asignación de texto y clase a botones
+  // Assign text and class to buttons
   deleteButton.innerHTML = 'Borrar';
   deleteButton.className = 'delete';
   title.innerHTML = `${entryBody}`;
   body.innerHTML = entryTitle;
   date.innerHTML = `${timeToDate} <hr>`;
 
-  // Añadiendo elementos al DOM
+  // Adding elements to the DOM
   listItem.appendChild(title);
   listItem.appendChild(date);
   listItem.appendChild(body);
@@ -178,6 +222,7 @@ const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
   return listItem;
 };
 
+// Function to add a new entry (only text)
 const addEntry = (key, entryCollection) => {
   const listItem = createNewEntryElement(entryCollection.title, entryCollection.body, entryCollection.creator, entryCollection.entryDate);
   listItem.setAttribute('data-keyentry', key);
@@ -185,11 +230,13 @@ const addEntry = (key, entryCollection) => {
   bindEntryEvents(listItem);
 };
 
+// Function to listen the entry button events
 const bindEntryEvents = (entryListItem) => {
   const deleteButton = entryListItem.querySelector('button.delete');
   deleteButton.addEventListener('click', deleteEntry);
 };
 
+// Function to delete an entry
 const deleteEntry = () => {
   const keyListItem = event.target.parentNode.dataset.keyentry;
   const refEntryToDelete = refEntry.child(keyListItem);
@@ -214,6 +261,7 @@ const deleteEntry = () => {
   });
 };
 
+// Function to read the entries on Firebase Database
 const getPostOfFirebase = () => {
   refEntry.on('value', (snapshot) => {
     entryList.innerHTML = '';
