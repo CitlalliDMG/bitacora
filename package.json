@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "main": "src/index.html",
   "license": "MIT",
+  "repository": "https://github.com/CitlalliDMG/bitacora.git",
   "scripts": {
     "htmlhint": "htmlhint snpm rc/*.html test/*.html",
     "eslint": "eslint --ext .js src/ test/",
