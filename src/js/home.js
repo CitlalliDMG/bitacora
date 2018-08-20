@@ -43,11 +43,14 @@ const entryTitle = document.getElementById('entry-title');
 const entryText = document.getElementById('new-entry');
 const btnPost = document.getElementById('save-entry');
 const inputImage = document.getElementById('input-image');
+const output = document.getElementById('list');
 
 // FUNCTIONS FOR ADD AND IMAGE
 
 const thumbFile = (theFile) => {
   return (eventFile) => {
+    console.log(eventFile);
+
     // Render thumbnail.
     let span = document.createElement('span');
     span.innerHTML = ['<img class="thumb" src="', eventFile.target.result,
@@ -144,8 +147,7 @@ const writeNewEntry = () => {
   };
 };
 
-// Listen to button share
-btnPost.addEventListener('click', writeNewEntry);
+
 
 // LOG-OUT FUNCTION
 // Get elements
@@ -192,6 +194,10 @@ const getTimeToDate = (time) => {
 
 // Function to create the structure of a new entry (only text)
 const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
+  let image = output.value;
+  console.log(output);
+
+
   // Crea los elementos que aparecen en el DOM
   const listItem = document.createElement('div');
   const title = document.createElement('p');

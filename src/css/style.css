@@ -127,6 +127,10 @@ ul p:nth-of-type(odd){
   border: none;
 }
 
+output {
+  margin: 3%;
+}
+
 #entry-title {
   margin-bottom: 0;
   font-size: 2em;

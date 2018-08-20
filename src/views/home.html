@@ -56,6 +56,7 @@
     <div class="card">
       <input type="text" class="new-entry" id="entry-title" placeholder="Título de la entrada" maxlength="30">
       <textarea class="new-entry" id="new-entry" cols="20" rows="3" placeholder="Escribe una nueva entrada"></textarea>
+      <output id="list"></output>
       <div class="row controls">
         <div class="row col-12 col-md-9" id="controls-row">
           <a type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
@@ -96,8 +97,7 @@
         <div class="modal-body">
           <div id="drop-zone">Arrastra tus imagenes aquí</div>
           <label for="file-image" class="btn btn-primary">O seleccionalas aquí</label>
-          <input type="file" id="file-image" accept="image/*" multiple>
-          <output id="list"></output>
+          <input type="file" id="file-image" accept="image/*">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal" id="button-image-cancel">Cancelar</button>
