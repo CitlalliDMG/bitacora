@@ -54,6 +54,20 @@
   <br>
   <main class="container" id="top">
     <div class="card">
+      <div class="row controls">
+        <h1 class="titles middle">Crea una nueva entrada</h1>
+        <div class="row col-12" id="controls-row">
+          <label for="file-text" class="btn btn-primary" data-toggle="modal" data-target="#modalText">
+            <i class="fas fa-comment-dots"></i>
+          </label>
+          <label for="file-image" class="btn btn-primary">
+            <i class="fas fa-image"></i>
+            <input type="file" id="file-image" accept="image/*">
+          </label>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="card">
       <input type="text" class="new-entry" id="entry-title" placeholder="Título de la entrada" maxlength="30">
       <textarea class="new-entry" id="new-entry" cols="20" rows="3" placeholder="Escribe una nueva entrada"></textarea>
       <output id="list"></output>
@@ -81,11 +95,33 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </main>
 
-  <!-- Modal -->
-  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <!-- Modal Text -->
+  <div class="modal fade" id="modalText" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Sube una entrada de texto</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="new-entry" id="entry-title" placeholder="Título de la entrada" maxlength="30">
+          <textarea class="new-entry" id="new-entry" cols="20" rows="3" placeholder="Escribe una nueva entrada"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="button-image-cancel">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="save-entry">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Image-->
+  <!-- <div class="modal fade" id="modalImage" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -96,16 +132,17 @@
         </div>
         <div class="modal-body">
           <div id="drop-zone">Arrastra tus imagenes aquí</div>
-          <label for="file-image" class="btn btn-primary">O seleccionalas aquí</label>
+          <label for="file-image" class="btn btn-primary">Seleccionalas aquí</label>
           <input type="file" id="file-image" accept="image/*">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal" id="button-image-cancel">Cancelar</button>
-          <button type="button" class="btn btn-primary">Guardar imagen</button>
+          <button type="button" class="btn btn-primary" id="image-button-upload">Guardar imagen</button>
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
+
   <section class="container" id="entries">
     <div class="cardStartMake" id="new-entries"></div>
   </section>

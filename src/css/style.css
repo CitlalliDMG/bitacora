@@ -56,6 +56,10 @@ h3, h4 {
   line-height: 300%;
 }
 
+p {
+  font-size: 1.2em;
+}
+
 .button {
  display: flex;
  justify-content: center;
@@ -125,6 +129,12 @@ ul p:nth-of-type(odd){
 .new-entry {
   margin: 3%;
   border: none;
+  width: 94%;
+}
+
+.card h1 {
+  font-size: 2.5em;
+  margin-top: 2%;
 }
 
 output {
@@ -191,11 +201,12 @@ output {
   display: none;
 }
 
-@media screen and (max-width: 767px) {
-  #controls-row {
-    justify-content: center;
-    margin-left: 5px;
-    margin-bottom: 15px;
-  }
+#controls-row {
+  justify-content: center;
+  margin: 15px auto 15px auto;
+}
+
+#controls-row label {
+  margin: 0 5px 0 5px;
 }
 

@@ -8,9 +8,6 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
   let user = firebase.auth().currentUser;
 
   if (user !== null) {
-    user.updateProfile({
-      displayName: user.displayName
-    });
     document.getElementById('welcome').innerHTML = `Bienvenid@ ${user.displayName} <span class="caret"></span>`;
     document.getElementById('user-name').innerHTML = `${user.displayName}`;
     const userPhoto = user.photoURL;
@@ -41,78 +38,71 @@ addUser = (name, email, photo) => {
 // Get elements
 const entryTitle = document.getElementById('entry-title');
 const entryText = document.getElementById('new-entry');
-const btnPost = document.getElementById('save-entry');
-const inputImage = document.getElementById('input-image');
-const output = document.getElementById('list');
+const btnPostText = document.getElementById('save-entry');
+const btnPostImage = document.getElementById('file-image');
+// const inputImage = document.getElementById('input-image');
+// const output = document.getElementById('list');
+
+let imageEntry;
 
 // FUNCTIONS FOR ADD AND IMAGE
 
-const thumbFile = (theFile) => {
-  return (eventFile) => {
-    console.log(eventFile);
+const publishNewImage = () => {
+  imageEntry = document.getElementById('file-image');
+  imageEntry.addEventListener('change', uploadImageToFirebase, false);
 
-    // Render thumbnail.
-    let span = document.createElement('span');
-    span.innerHTML = ['<img class="thumb" src="', eventFile.target.result,
-      '" title="', escape(theFile.name), '"/>'].join('');
-    document.getElementById('list').insertBefore(span, null);
-  };
+  storageRef = storage.ref();
 };
 
-const handleFileSelect = (event) => {
-  // Get the FileList object
-  let files = event.target.files;
-
-  // Loop through the FileList and render image files as thumbnails.
-  for (let i = 0, file; file = files[i]; i++) {
-    let reader = new FileReader();
-
-    // Closure to capture the file information.
-    reader.onload = thumbFile(file);
-
-    // Read in the image file as a data URL.
-    reader.readAsDataURL(file);
-  }
+const uploadImageToFirebase = () => {
+  const currentUser = firebase.auth().currentUser;
+  let imageToLoad = imageEntry.files[0];
+  let uploadTask = storageRef.child('userImages/' + currentUser.uid + '/' + imageToLoad.name).put(imageToLoad);
+  // Register three observers:
+  // 1. 'state_changed' observer, called any time the state changes
+  // 2. Error observer, called on failure
+  // 3. Completion observer, called on successful completion
+  uploadTask.on('state_changed', function(snapshot) {
+    // Observe state change events such as progress, pause, and resume
+    // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    console.log('Upload is ' + progress + '% done');
+    switch (snapshot.state) {
+    case firebase.storage.TaskState.PAUSED: // or 'paused'
+      console.log('Upload is paused');
+      break;
+    case firebase.storage.TaskState.RUNNING: // or 'running'
+      console.log('Upload is running');
+      break;
+    }
+  }, function(error) {
+    // Handle unsuccessful uploads
+  }, function() {
+    // Handle successful uploads on complete
+    // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+    uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+      console.log('File available at', downloadURL);
+      createNodeInDatabase(imageToLoad.name, downloadURL, currentUser.uid);
+    });
+  });
 };
 
-document.getElementById('file-image').addEventListener('change', handleFileSelect, false);
+const createNodeInDatabase = (imageName, url, userUid) => {
+  console.log(imageName);
+  console.log(url);
+  console.log(userUid);
 
-function handleFileSelectDrop(evt) {
-  evt.stopPropagation();
-  evt.preventDefault();
+  refEntry = firebase.database().ref().child('user-entries/' + userUid + '/');
+  console.log(refEntry);
+  const date = (new Date).getTime();
+  refEntry.push({
+    nombre: imageName,
+    url: url,
+    date: date
+  });
+};
 
-  var files = evt.dataTransfer.files; // FileList object.
-
-  // Loop through the FileList and render image files as thumbnails.
-  for (let i = 0, file; file = files[i]; i++) {
-    let reader = new FileReader();
-
-    // Closure to capture the file information.
-    reader.onload = thumbFile(file);
-
-    // Read in the image file as a data URL.
-    reader.readAsDataURL(file);
-  }
-}
-
-function handleDragOver(evt) {
-  evt.stopPropagation();
-  evt.preventDefault();
-  evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
-}
-
-// Setup the dnd listeners.
-var dropZone = document.getElementById('drop-zone');
-dropZone.addEventListener('dragover', handleDragOver, false);
-dropZone.addEventListener('drop', handleFileSelectDrop, false);
-
-// Clean modal image
-document.getElementById('button-image-cancel').addEventListener('click', ()=>{
-  document.getElementById('list').innerHTML = '';
-});
-
-// END OF FUNCTIONS FOR ADD AND IMAGE
-
+// FUNCTIONS FOR ADD A TEXT POST
 const writeNewEntry = () => {
   const currentUser = firebase.auth().currentUser;
   const textInTitle = entryTitle.value;
@@ -135,34 +125,25 @@ const writeNewEntry = () => {
     };
 
     // Create a unique key for messages collection
-    const newEntryKey = firebase.database().ref().child('entries').push().key;
+    const newEntryKey = firebase.database().ref().child('user-entries').push().key;
 
     // Write the new entry's data simultaneously in the entry list and the user's entry list.
     let updates = {};
 
-    updates['/entries/' + newEntryKey] = entryData;
+    // updates['/entries/' + newEntryKey] = entryData;
     updates['/user-entries/' + currentUser.uid + '/' + newEntryKey] = entryData;
 
     return firebase.database().ref().update(updates);
   };
 };
 
-
-
-// LOG-OUT FUNCTION
-// Get elements
-const btnLogout = document.getElementById('btn-log-out');
-
-// Add logout event
-btnLogout.addEventListener('click', event => {
-  firebase.auth().signOut();
-  window.location.assign('../index.html');
-});
-
 // Get the entries list of the current user
 const entryList = document.getElementById('new-entries');
 let refEntry;
+
 const init = () => {
+  console.log(firebase.auth().currentUser);
+
   let userUid = firebase.auth().currentUser.uid;
   refEntry = firebase.database().ref().child('user-entries/' + userUid);
   getPostOfFirebase();
@@ -188,16 +169,12 @@ const getTimeToDate = (time) => {
     month = '0' + month;
   };
 
-  timeToDate = `${day} / ${month} / ${year} a las ${hours} : ${minutes}`;
+  timeToDate = `${day}/${month}/${year} a las ${hours}:${minutes}`;
   return timeToDate;
 };
 
 // Function to create the structure of a new entry (only text)
-const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
-  let image = output.value;
-  console.log(output);
-
-
+const createNewEntryElement = (entryTitle, entryBody, datePost) => {
   // Crea los elementos que aparecen en el DOM
   const listItem = document.createElement('div');
   const title = document.createElement('p');
@@ -216,8 +193,40 @@ const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
   // Assign text and class to buttons
   deleteButton.innerHTML = 'Borrar';
   deleteButton.className = 'delete';
-  title.innerHTML = `${entryBody}`;
-  body.innerHTML = entryTitle;
+  title.innerHTML = `${entryTitle}`;
+  body.innerHTML = entryBody;
+  date.innerHTML = `${timeToDate} <hr>`;
+
+  // Adding elements to the DOM
+  listItem.appendChild(title);
+  listItem.appendChild(date);
+  listItem.appendChild(body);
+  listItem.appendChild(deleteButton);
+  return listItem;
+};
+
+const createNewImageEntry = (imageName, url, entryDate) => {
+  // Create elements of DOM
+  const listItem = document.createElement('div');
+  const title = document.createElement('p');
+  const date = document.createElement('p');
+  const body = document.createElement('img');
+  const deleteButton = document.createElement('button');
+  const time = entryDate; // Get the time in miliseconds from post data
+  const timeToDate = getTimeToDate(time); // Convert the time to string in format UTC
+
+  // Assign class to the text area to edit
+  listItem.className = 'entry-card';
+  title.className = 'entry-name titles';
+  body.className = 'image col-12';
+  date.className = 'dateString';
+
+  // Assign text and class to buttons
+  deleteButton.innerHTML = 'Borrar';
+  deleteButton.className = 'delete';
+  title.innerHTML = `${imageName}`;
+  body.setAttribute('src', `${url}`);
+  // body.innerHTML = url;
   date.innerHTML = `${timeToDate} <hr>`;
 
   // Adding elements to the DOM
@@ -230,7 +239,12 @@ const createNewEntryElement = (entryTitle, entryBody, creator, datePost) => {
 
 // Function to add a new entry (only text)
 const addEntry = (key, entryCollection) => {
-  const listItem = createNewEntryElement(entryCollection.title, entryCollection.body, entryCollection.creator, entryCollection.entryDate);
+  let listItem = '';
+  if (entryCollection.title !== undefined) {
+    listItem = createNewEntryElement(entryCollection.title, entryCollection.body, entryCollection.entryDate);
+  } else if (entryCollection.url !== undefined) {
+    listItem = createNewImageEntry(entryCollection.nombre, entryCollection.url, entryCollection.date);
+  };
   listItem.setAttribute('data-keyentry', key);
   entryList.insertBefore(listItem, entryList.childNodes[0]);
   bindEntryEvents(listItem);
@@ -277,3 +291,16 @@ const getPostOfFirebase = () => {
     }
   });
 };
+
+btnPostText.addEventListener('click', writeNewEntry);
+btnPostImage.addEventListener('click', publishNewImage);
+
+// LOG-OUT FUNCTION
+// Get elements
+const btnLogout = document.getElementById('btn-log-out');
+
+// Add logout event
+btnLogout.addEventListener('click', event => {
+  firebase.auth().signOut();
+  window.location.assign('../index.html');
+});

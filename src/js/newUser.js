@@ -21,8 +21,15 @@ btnSignUp.addEventListener('click', event => {
 // Add a realtime listener
 firebase.auth().onAuthStateChanged(firebaseUser => {
   if (firebaseUser) {
-    console.log(firebaseUser);
-    window.location.assign('../src/views/home.html');
+    let user = firebase.auth().currentUser;
+    if (user !== null) {
+      user.updateProfile({
+        displayName: txtName.value
+      });
+      window.location.assign('../views/home.html');
+    }
+  } else {
+    console.log('not logged in');
   }
 });
 
